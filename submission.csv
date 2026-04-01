@@ -1,0 +1,41 @@
+query_id,predicted_citations
+test_001,Art. 6 Abs. 1 946.231.143.6;Art. 10 Abs. 3 VTE;Art. 45 Abs. 2 SPBV-EJPD;Art. 33 Abs. 4 EDAV-DS;Art. 2 Abs. 4 VPeA
+test_002,Art. 83 SVG;Art. 59 Abs. 1 SVG;Art. 19 Abs. 3 SVG;Art. 70 SVG;Art. 94 Abs. 4 SVG
+test_003,Art. 267a CO;Art. 11 Abs. 1 STUV;Art. 3 Abs. 1 STUG;Art. 15 Abs. 1 VMob;Art. 7 Abs. 2 VST
+test_004,Art. 166 Abs. 2 SCHKG;Art. 37e Abs. 7 KLV;Art. 31 Abs. 4 GebV-öV;Art. 12 Abs. 1bis StV;Art. 93c Abs. 2 ChemV
+test_005,Art. 74 GBV;Art. 28 Abs. 2 AVV;Art. 68 Abs. 1 VZG;Art. 318 Abs. 1bis SchKG;Art. 314 Abs. 1bis SchKG
+test_006,Art. 5 PRHG;Art. 4 PRHG;Art. 145 Abs. 4 VZV;Art. 93 Abs. 1 VZV;Art. 40 Abs. 2 VAF
+test_007,Art. 25 Abs. 3 EpV;Art. 76 Abs. 5 ZDV;Art. 244d Abs. 1 TSV;Art. 2 Abs. 3 VFD;Art. 21 Abs. 2 UVG
+test_008,Art. 3 Abs. 1 FamZG;Art. 19 Abs. 1 BG-HAÜ;Art. 73 Abs. 1 VZAE;Art. 35a Abs. 2 ZStV;Art. 98 Abs. 4 ZStV
+test_009,Art. 73 Abs. 1 ZStV;Art. 45 Abs. 2 IPRG;Art. 66 Abs. 2 ZStV;Art. 43 Abs. 2 IPRG;Art. 45 Abs. 3 IPRG
+test_010,Art. 398 STPO;Art. 121 Abs. 6 BV;Art. 185 Abs. 7 StGB;Art. 21 PHV;Art. 103 Abs. 1 VStrR
+test_011,Art. 38 AND;Art. 5 Abs. 3 WResV;Art. 13 Abs. 3 DigiV;Art. 6 Abs. 1 946.231.143.6;Art. 54 Abs. 1 KKV
+test_012,Art. 400 OR;Art. 9 Abs. 3 VPVKEU;Art. 9 VPEV;Art. 144 AHVV;Art. 4 Abs. 1 Covid-19-SBüG
+test_013,Art. 8 Abs. 1 PVSPA;Art. 41 Abs. 3 AVIG;Art. 27 Abs. 2 AVV;Art. 12 Abs. 1 PVFMH;Art. 37 AVIG
+test_014,Art. 4 ATSG;Art. 6 Abs. 1 UVG;Art. 6 Abs. 2 UVG;Art. 106 Abs. 2 AVIG;Art. 49 Abs. 4 DSG
+test_015,Art. 12 Abs. 2 DBG;Art. 75 Abs. 1 ZStV;Art. 45 Abs. 2 IPRG;Art. 42 Abs. 3 AHVG;Art. 43 Abs. 1 IPRG
+test_016,Art. 322a Abs. 3 OR;Art. 6quater Abs. 2 IVV;Art. 8 Abs. 2 AHVG;Art. 9 Abs. 2 AHVG;Art. 4 Abs. 1 837.023.3
+test_017,Art. 18 Abs. 2 EnV;Art. 18 Abs. 1 EnV;Art. 268 Abs. 1 OR;Art. 91 Abs. 1 VZG;Art. 17 Abs. 2 VWEG
+test_018,Art. 77 Abs. 2 PatV;Art. 42 Abs. 8 VNF;Art. 964j Abs. 1 OR;Art. 2 Abs. 3 VKZ;Art. 109 Abs. 2 FiFV
+test_019,Art. 45 Abs. 3 IPRG;Art. 109 Abs. 3 ZGB;Art. 73 Abs. 1 ZStV;Art. 292 Abs. 1 ZPO;Art. 114 ZGB
+test_020,Art. 779d Abs. 1 ZGB;Art. 73 Abs. 1 SSG;Art. 82 Abs. 1 SSG;Art. 31 Abs. 2 GebV-öV;Art. 21 Abs. 1 LSMG
+test_021,Art. 35 Abs. 1 BetmKV;Art. 31 Abs. 1 BetmKV;Art. 3 Abs. 7 SebV;Art. 2 Abs. 2 FAV;Art. 103 Abs. 1 LFV
+test_022,Art. 46 IPRG;Art. 10 IPRG;Art. 45 Abs. 3 IPRG;Art. 109 Abs. 3 ZGB;Art. 64 Abs. 1 ZStV
+test_023,Art. 52 Abs. 1 AHVG;Art. 79 ZGB;Art. 20 Abs. 3 VBSV;Art. 117 Abs. 5 641.711;Art. 97 Abs. 5 BSV
+test_024,Art. 33 Abs. 2 DBG;Art. 4 Abs. 1 ELV;Art. 8 Abs. 2 AHVG;Art. 21b Abs. 1 ELV;Art. 46a Abs. 5 VRAB
+test_025,Art. 120 Abs. 2 ZGB;Art. 286 Abs. 1 ZPO;Art. 114 ZGB;Art. 61 IPRG;Art. 60 IPRG
+test_026,Art. 15 Abs. 5 ZV;Art. 266m Abs. 1 OR;Art. 15 Abs. 1 ZV;Art. 201 Abs. 2 ZGB;Art. 292 Abs. 1 ZPO
+test_027,Art. 298 Abs. 2ter ZGB;Art. 22bis Abs. 2 IVG;Art. 326 ZGB;Art. 277 Abs. 1 ZGB;Art. 296 Abs. 2 ZGB
+test_028,Art. 58 Abs. 1 OR;Art. 10 Abs. 2 ArGV 4;Art. 76 Abs. 2 SprstV;Art. 76 Abs. 3 SprstV;Art. 79 Abs. 1 SprstV
+test_029,Art. 5 Abs. 1 IVG;Art. 42 Abs. 3 IVG;Art. 50a Abs. 6 MStG;Art. 67a Abs. 6 StGB;Art. 426 Abs. 1 ZGB
+test_030,Art. 11 Abs. 1 BewV;Art. 33 Abs. 1 AIG;Art. 15 Abs. 5 ZV;Art. 73 Abs. 1 VZAE;Art. 36 Abs. 3 VRAB
+test_031,Art. 125 OF;Art. 17 Abs. 2 ÜLG;Art. 10 Abs. 1 ÜLG;Art. 11 Abs. 1 ELG;Art. 10b Abs. 1 IGE-PersV
+test_032,Art. 4 Abs. 1 943.1;Art. 5 Abs. 1 VAwG;Art. 108a AsylG;Art. 22 Abs. 5 AsylG;Art. 80 Abs. 5 AIG
+test_033,Art. 59 Abs. 1 VABFP;Art. 21 Abs. 1 221.215.324.1;Art. 10 412.101.220.30;Art. 26 Abs. 3 832.311.12;Art. 11 822.115.2
+test_034,Art. 839 ZGB;Art. 123 Abs. 3 GBV;Art. 76 Abs. 2 GBV;Art. 52 Abs. 1 GBV;Art. 117d Abs. 1 SprstV
+test_035,Art. 263 ZPO;Art. 89 IPRG;Art. 50 Abs. 1 AIG;Art. 42 Abs. 2 AIG;Art. 12 Abs. 2 DBG
+test_036,Art. 255 Abs. 1 STPO;Art. 197 Abs. 1 STPO;Art. 101 Abs. 1 STPO;Art. 84h Abs. 1 MStP;Art. 154 Abs. 1 StPO
+test_037,Art. 16d Abs. 3 THG;Art. 86a Abs. 1 PatG;Art. 26 Abs. 3 ZV-EFD;Art. 213 Abs. 2 VTS;Art. 5 Abs. 1 VID
+test_038,Art. 16c Abs. 1 SVG;Art. 9b Abs. 3 PartG;Art. 10 Abs. 1 PartG;Art. 37b Abs. 2 PartG;Art. 124 ZG
+test_039,Art. 66 Abs. 1 KKV-FINMA;Art. 57 Abs. 2 747.11;Art. 14b Abs. 1 SEFV;Art. 60b Abs. 2 GSchG;Art. 23 Abs. 4 747.111
+test_040,Art. 176 ZGB;Art. 42 Abs. 3 AHVG;Art. 45 Abs. 2 IPRG;Art. 75 Abs. 1 ZStV;Art. 43 Abs. 1 IPRG
