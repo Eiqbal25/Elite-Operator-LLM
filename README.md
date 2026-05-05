@@ -108,7 +108,7 @@ Output size adapts per query rather than using a fixed top-k:
 
 | Version | Description | Macro F1 |
 |---------|-------------|----------|
-| Baseline | MiniLM dense retrieval, laws only, fixed top-5 | `0.0661` |
+| Baseline | MiniLM dense retrieval, laws only, fixed top-5 | `0.0125` |
 | **v2 (this notebook)** | **Hybrid BM25+FAISS+RRF, Qwen3 reranker, court corpus** | **`0.0700`** |
 
 ---
