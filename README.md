@@ -1,194 +1,165 @@
-# 🏛️ Elite Operator LLM — Swiss Legal Information Retrieval
+# Hybrid Legal Retrieval — Kaggle Competition Notebook
 
-> **Kaggle Competition:** [LLM Agentic Legal Information Retrieval](https://www.kaggle.com/competitions/llm-agentic-legal-information-retrieval)  
-> **Team:** Elite Operator  
-> **Repository:** Deep Learning Project for LLM Operator Development and Optimization
+**Competition:** [LLM Agentic Legal Information Retrieval](https://www.kaggle.com/competitions/llm-agentic-legal-information-retrieval)
 
----
+**Task:** Given English legal questions, retrieve relevant Swiss law articles and court decisions (written in German).
 
-## 📌 Table of Contents
+**Metric:** Macro F1 — per-query F1 between predicted and gold citations, averaged across all queries.
 
-- [Competition Overview](#-competition-overview)
-- [Task Description](#-task-description)
-- [Dataset](#-dataset)
-- [Evaluation Metric](#-evaluation-metric)
-- [Our Approach](#-our-approach)
-- [Baseline Model](#-baseline-model)
-- [Project Structure](#-project-structure)
-- [Getting Started](#-getting-started)
-- [Results](#-results)
-- [Future Work](#-future-work)
+**Current Public Score:** 0.067
 
 ---
 
-## 🏆 Competition Overview
+## Architecture
 
-This project is our team's submission to the **LLM Agentic Legal Information Retrieval** Kaggle competition. The challenge involves building an intelligent information retrieval system for **Swiss law** — a complex, multilingual legal domain.
-
-The competition tests both NLP capabilities and engineering efficiency, as all inference must run **offline within a 12-hour compute budget**.
-
----
-
-## 📋 Task Description
-
-Given a legal question written in **English**, the system must retrieve a ranked list of the most relevant Swiss legal sources — including statutes and Federal Court decisions — which are primarily written in **German, French, or Italian**.
-
-Key challenges:
-- **Cross-lingual retrieval:** English queries → multilingual legal corpus
-- **Exact citation matching:** Predictions must match canonical citation strings precisely
-- **Offline inference:** No internet access during execution
-- **Compute constraints:** Hard limit of 12 hours total runtime
-
----
-
-## 📂 Dataset
-
-| File | Description |
-|------|-------------|
-| `train.csv` | 1,139 public training queries (non-English) with gold-standard citation labels, based on the LEXam dataset |
-| `val.csv` | 10 English validation queries with gold citations |
-| `test.csv` | 40 hidden English test queries for final submission |
-| `laws_de.csv` | 175,933 Swiss federal law snippets in German, keyed by canonical citation string |
-| `court_considerations.csv` | Large corpus of Swiss Federal Court decisions *(planned for future iterations)* |
-
----
-
-## 📊 Evaluation Metric
-
-Submissions are evaluated using **Macro F1 Score** at the citation level.
-
-$$F1 = \frac{2 \cdot \text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}$$
-
-- **True Positive:** A predicted citation that exactly matches a gold citation string
-- **Precision:** Fraction of predicted citations that were correct
-- **Recall:** Fraction of gold citations that were successfully retrieved
-- **Macro F1:** Per-query F1 averaged across all queries
-
-This metric penalizes both over-predicting (too many irrelevant citations) and under-predicting (missing key citations).
-
----
-
-## 🧠 Our Approach
-
-### Baseline — Multilingual Deep Learning Semantic Search
-
-Since queries are in English but the law corpus is in German, traditional keyword methods like TF-IDF fail due to the language barrier. Our baseline addresses this with a **two-stage hybrid retrieval** pipeline:
-
-#### Stage 1: Deep Learning Semantic Search
-We use a **Multilingual Sentence Transformer** (`paraphrase-multilingual-MiniLM-L12-v2`) to encode both the English query and German law snippets into the same dense vector space. Cosine similarity is then computed to retrieve the top-K most semantically relevant articles.
-
-#### Stage 2: Regex Heuristic (Rule-Based Boosting)
-We complement neural retrieval with a **regex-based extractor** that detects explicit article mentions in the query (e.g., `Art. 42 OR`) and directly maps them to canonical citation strings. These rule-based hits are merged with the neural results.
-
-**Prediction pipeline:**
 ```
-Query (English)
+English Query
     │
-    ├──► [Multilingual Sentence Transformer] ──► Top-K semantic matches
+    ├──► BM25 (laws, German) ──────────┐
+    ├──► FAISS dense (laws, German) ───┤── RRF Fusion ──► Law candidates
+    │                                   │
+    │   ┌───────────────────────────────┘
+    │   │
+    │   ├──► Query expansion (top-3 law citation strings)
+    │   ├──► Law abbreviation extraction (StPO, OR, ZGB, BV...)
+    │   │
+    │   ├──► BM25 (courts, original query) ────────┐
+    │   ├──► BM25 (courts, expanded query) ────────┤── Merge ──► Court candidates
+    │   └──► BM25 (courts, abbreviations only) ────┘
     │
-    └──► [Regex Article Extractor] ──► Direct citation hits
-                        │
-                        ▼
-              Merged & Deduplicated Predictions
+    ├──► Merge & deduplicate (laws + courts)
+    │
+    ├──► Qwen3-Reranker with MaxSim chunking
+    │       • Split long docs into 200-word overlapping chunks
+    │       • Score each chunk independently
+    │       • Assign max chunk score to parent document
+    │
+    └──► Adaptive citation count
+            • Return all with score ≥ 0.5
+            • Minimum: TOP_K_FINAL (10)
+            • Maximum: 30
 ```
 
----
+## Models
 
-## 📓 Baseline Model
+| Model | Role | Size | Device |
+|-------|------|------|--------|
+| Qwen/Qwen3-Embedding-0.6B | Document & query encoding | ~1.2 GB | GPU |
+| Qwen/Qwen3-Reranker-0.6B | Relevance scoring (yes/no) | ~1.2 GB | GPU |
 
-| Property | Details |
-|----------|---------|
-| **Model** | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` |
-| **Retrieval** | Cosine similarity over dense embeddings |
-| **Heuristic** | Regex pattern matching for article references |
-| **Top-K** | 5 citations per query (for submission) |
-| **Device** | CUDA (GPU) / CPU fallback |
-| **Inference** | Fully offline-compatible |
+Both models loaded simultaneously on a single T4 GPU (15 GB VRAM).
 
-The notebook `baseline_model.ipynb` contains:
-1. Data loading and exploratory analysis
-2. Corpus encoding into dense vectors
-3. Hybrid prediction function
-4. Validation evaluation with F1/Precision/Recall reporting
-5. Submission CSV generation
-6. Performance visualization dashboard
+## Datasets
 
----
+| Dataset | Size | Description |
+|---------|------|-------------|
+| laws_de.csv | ~175K rows | Swiss federal law articles (German) |
+| court_considerations.csv | ~2.47M rows | Swiss court decision excerpts (German) |
+| train.csv | Training queries with gold citations |
+| val.csv | 10 validation queries with gold citations |
+| test.csv | 40 test queries (submission target) |
 
-## 📁 Project Structure
+## Hyperparameters
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| TOP_K_RETRIEVAL | 60 | Candidates retrieved per signal |
+| TOP_K_FINAL | 10 | Minimum citations returned per query |
+| TEXT_TRUNCATE | 3500 | Max chars for reranker input |
+| RRF_K | 60 | Reciprocal rank fusion smoothing |
+| LAWS_EXPANSION_TOP_K | 3 | Law citations used for court query expansion |
+| CHUNK_SIZE | 200 | Words per reranker chunk |
+| CHUNK_OVERLAP | 50 | Overlapping words between chunks |
+| EMBEDDING_BATCH_SIZE | 16 | Batch size for corpus encoding |
+| RERANKER_BATCH_SIZE | 8 | Batch size for reranker scoring |
+
+## Notebook Structure
+
+| Cell | Section | Description | Runtime |
+|------|---------|-------------|---------|
+| 1 | Install | `sentence_transformers`, `bm25s`, `faiss-cpu` | ~30s |
+| 3 | Config | Imports, paths, hyperparameters, GPU setup | instant |
+| 5 | Data Loading | Load train/val/test + laws + court CSVs | ~30s |
+| 7 | Text Composition | Build `citation + title + text` strings, lookup dicts | instant |
+| 9 | BM25 Index | Build BM25 indexes for laws and courts (German stopwords) | ~5 min |
+| 11 | Embedding Model | Load Qwen3-Embedding-0.6B on GPU | ~10s |
+| 12 | Encoding Functions | `encode_queries()` (with instruction), `encode_corpus()` (without) | instant |
+| 14 | FAISS Index | Encode laws → FAISS (cached to disk after first run) | ~40 min / 2s |
+| 16 | Reranker | Load Qwen3-Reranker-0.6B, define MaxSim chunking | ~10s |
+| 18 | Retrieval Functions | `search_faiss`, `reciprocal_rank_fusion`, `chunk_text`, `rerank_candidates` | instant |
+| 20 | Main Pipeline | `retrieve_citations()` — full pipeline per query | instant |
+| 22 | Evaluation | Macro F1 on 10 validation queries + per-query breakdown | ~10 min |
+| 24 | Submission | Encode test queries, retrieve, save `submission.csv` | ~30 min |
+
+**Total runtime:** ~50 min (first run) / ~15 min (with FAISS cache)
+
+## Key Improvements Over Original Baseline
+
+| # | Improvement | Impact |
+|---|-------------|--------|
+| 1 | **Chunking + MaxSim reranking** — splits long documents into 200-word overlapping chunks, scores each, takes max per document | Finds relevant passages buried deep in long court decisions |
+| 2 | **Multi-query court retrieval** — 3 BM25 queries instead of 1 (original, expanded, abbreviations) | Better court recall through diverse query formulations |
+| 3 | **Adaptive citation count** — returns more when reranker is confident (score ≥ 0.5) | Adapts to queries with many vs few relevant citations |
+| 4 | **FAISS disk caching** — saves encoded index to `/kaggle/working/faiss_laws.index` | Reduces restart time from ~40 min to ~2 seconds |
+
+## Caching
+
+| Cache | Path | First Run | Restarts |
+|-------|------|-----------|----------|
+| FAISS laws index | `/kaggle/working/faiss_laws.index` | ~40 min (encode + save) | ~2 seconds (load) |
+
+## How Qwen3-Embedding Works
+
+Qwen3-Embedding uses **instruction-aware encoding**:
+
+- **Queries** are prefixed with: `"Instruct: {task_instruction}\nQuery: {query_text}"`
+- **Documents** are encoded as-is (no prefix)
+
+This tells the model what kind of retrieval task is being performed, improving cross-lingual matching (English queries → German documents).
+
+## How Qwen3-Reranker Works
+
+Qwen3-Reranker is a **causal language model** (not a cross-encoder). It judges relevance by:
+
+1. Formatting query + document into a chat template
+2. Running a forward pass
+3. Extracting logits for tokens "yes" and "no"
+4. Computing `P(yes)` as the relevance score (0-1)
+
+Loaded via `AutoModelForCausalLM`, NOT `CrossEncoder` (which would give random scores).
+
+## Known Limitations
+
+- **Cross-lingual gap**: English BM25 queries match poorly against German corpus. Only shared terms (law abbreviations, article numbers) provide useful BM25 signal.
+- **Court recall**: 2.47M court decisions are too large for dense encoding on T4. Courts use BM25-only retrieval.
+- **Retrieval ceiling**: Debug shows only 3-6 out of 36-47 gold citations are found in the candidate pool. The reranker can only rank what was retrieved.
+
+## Potential Further Improvements
+
+| Improvement | Difficulty | Expected Impact |
+|-------------|-----------|-----------------|
+| Query translation EN→DE (Helsinki-NLP/opus-mt-en-de, ~300MB) | Easy | High — German BM25 on German text |
+| Dense court encoding (chunked FAISS for 2.47M rows) | Hard (OOM) | High — semantic court retrieval |
+| HyDE (generate hypothetical German analysis per query) | Medium | Medium — bridges cross-lingual gap |
+| Citation graph (PageRank, co-citation from cross-references) | Medium | Medium — exploits legal citation structure |
+| Fine-tuning embedding model on Swiss legal data | Hard | High — domain adaptation |
+| Agentic RAG with LLM-guided query reformulation | Hard | High — multi-step retrieval |
+
+## File Structure
 
 ```
-Elite-Operator-LLM/
-├── baseline_model.ipynb      # Main baseline notebook
-├── submission.csv            # Generated submission file
-├── output.png                # Performance visualization output
-├── DATASET/                  # Dataset folder
-│   ├── train.csv
-│   ├── val.csv
-│   ├── test.csv
-│   └── laws_de.csv
-└── README.md
+├── baseline-upgrade-0-067.ipynb    # Main notebook
+├── README.md                       # This file
+├── submission.csv                  # Output (generated)
+└── /kaggle/working/
+    └── faiss_laws.index            # Cached FAISS index
 ```
 
----
+## Reproduction
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-```bash
-pip install sentence-transformers torch pandas numpy tqdm matplotlib seaborn
-```
-
-### Running the Baseline
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/Eiqbal25/Elite-Operator-LLM.git
-   cd Elite-Operator-LLM
-   ```
-
-2. Place the competition dataset files into the `DATASET/` folder (or update file paths in the notebook).
-
-3. Open and run `baseline_model.ipynb` end-to-end.
-
-4. The submission file will be saved as `submission.csv`.
-
-> **Note for Kaggle:** The Sentence Transformer model must be downloaded and uploaded as a Kaggle Dataset for offline inference. Replace the model path string in the notebook with your local dataset path (e.g., `/kaggle/input/minilm-model`).
-
----
-
-## 📈 Results
-
-Performance on the 10-query validation set:
-
-| Metric | Score |
-|--------|-------|
-| Precision | *(see notebook output)* |
-| Recall | *(see notebook output)* |
-| **Macro F1** | *(see notebook output)* |
-
-Visual performance reports (bar chart + per-query breakdown + success rate pie chart) are generated at the end of the notebook.
-
----
-
-## 🔮 Future Work
-
-- [ ] **Expand corpus coverage** — integrate `court_considerations.csv` (Federal Court decisions)
-- [ ] **Reranking** — add a cross-encoder reranker for higher precision
-- [ ] **Larger multilingual models** — experiment with `multilingual-e5-large` or `LaBSE`
-- [ ] **Query translation** — translate English queries to German/French before retrieval
-- [ ] **Ensemble strategies** — combine multiple retrievers for improved recall
-- [ ] **Fine-tuning** — domain-adapt the embedding model on Swiss legal text pairs
-
----
-
-## 👥 Team
-
-**Elite Operator** — competing in the Kaggle LLM Operator Development and Optimization competition.
-
----
-
-## 📄 License
-
-This project is for academic and competition purposes. Dataset usage is subject to [Kaggle competition rules](https://www.kaggle.com/competitions/llm-agentic-legal-information-retrieval/rules).
+1. Upload notebook to Kaggle
+2. Ensure GPU (T4) and Internet are enabled
+3. Attach competition dataset
+4. Run All Cells
+5. First run: ~50 minutes. Subsequent runs: ~15 minutes (FAISS cached)
+6. Output: `submission.csv`
